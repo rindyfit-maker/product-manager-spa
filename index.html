@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ProductFlow — DummyJSON Manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- NOISE OVERLAY -->
+  <div class="noise"></div>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-mark">◈</span>
+        <span class="logo-text">ProductFlow</span>
+      </div>
+      <div class="header-meta">
+        <span class="api-badge">DummyJSON API</span>
+        <span class="header-desc">CRUD Simulator</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-inner">
+      <h1 class="hero-title">Manajemen<br /><em>Produk</em> Digital</h1>
+    </div>
+    <div class="hero-deco" aria-hidden="true">
+      <span>POST</span><span>PUT</span><span>DELETE</span><span>GET</span>
+    </div>
+  </section>
+
+  <main class="main-layout">
+
+    <!-- FORM PANEL -->
+    <aside class="form-panel">
+      <div class="panel-header">       
+        <h2 class="panel-title" id="formTitle">Tambah Produk</h2>
+      </div>
+
+      <!-- ERROR / SUCCESS NOTIFICATION -->
+      <div class="notification" id="notification" role="alert" aria-live="polite"></div>
+
+      <div class="form-card">
+        <div class="field-group">
+          <label class="field-label" for="productName">Nama Produk</label>
+          <input
+            type="text"
+            id="productName"
+            class="field-input"
+            placeholder="e.g. Wireless Keyboard Pro"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="productPrice">Harga (USD)</label>
+          <div class="price-wrap">
+            <span class="price-prefix">$</span>
+            <input
+              type="number"
+              id="productPrice"
+              class="field-input price-input"
+              placeholder="0.00"
+              min="0"
+              step="0.01"
+            />
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="productCategory">Kategori</label>
+          <input
+            type="text"
+            id="productCategory"
+            class="field-input"
+            placeholder="e.g. Electronics"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-primary" id="submitBtn" type="button">
+            <span class="btn-icon">+</span>
+            <span class="btn-text">Tambah Produk</span>
+          </button>
+          <button class="btn btn-ghost" id="cancelBtn" type="button" style="display:none;">
+            Batal Edit
+          </button>
+        </div>
+
+        <!-- hidden field for edit mode -->
+        <input type="hidden" id="editingId" value="" />
+      </div>
+
+      <!-- METHOD INDICATOR -->
+      <div class="method-indicator" id="methodIndicator">
+        <span class="method-dot post"></span>
+        <span class="method-label">POST /products/add</span>
+      </div>
+
+      <!-- STATS -->
+      <div class="stats-row">
+        <div class="stat-item">
+          <span class="stat-number" id="totalCount">0</span>
+          <span class="stat-label">Total Produk</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number" id="addedCount">0</span>
+          <span class="stat-label">Baru Ditambah</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number" id="editedCount">0</span>
+          <span class="stat-label">Diedit</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- PRODUCT LIST PANEL -->
+    <section class="list-panel">
+      <div class="list-header">
+        <h2 class="list-title">Daftar Produk</h2>
+        <div class="list-controls">
+          <input type="text" id="searchInput" class="search-input" placeholder="Cari produk…" />
+          <button class="btn btn-load" id="loadMoreBtn" type="button">
+            Muat Data API
+          </button>
+        </div>
+      </div>
+
+      <!-- LOADING SKELETON -->
+      <div class="skeleton-list" id="skeletonList">
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+      </div>
+
+      <!-- PRODUCT GRID -->
+      <div class="product-grid" id="productGrid"></div>
+
+      <!-- EMPTY STATE -->
+      <div class="empty-state" id="emptyState" style="display:none;">
+        <div class="empty-icon">◎</div>
+        <p>Belum ada produk.</p>
+        <p class="empty-sub">Tambah produk baru lewat form di samping, atau klik "Muat Data API".</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- TOAST CONTAINER -->
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <!-- DELETE CONFIRM MODAL -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-icon">⚠</div>
+      <h3 class="modal-title" id="modalTitle">Hapus Produk?</h3>
+      <p class="modal-body" id="modalBody">Tindakan ini akan mengirim request DELETE ke server. Data akan dihapus dari tampilan.</p>
+      <div class="modal-actions">
+        <button class="btn btn-danger" id="confirmDeleteBtn">Ya, Hapus</button>
+        <button class="btn btn-ghost" id="cancelDeleteBtn">Batal</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
